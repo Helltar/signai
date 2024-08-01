@@ -1,4 +1,4 @@
-package com.helltar.c
+package com.helltar.signai
 
 import com.helltar.signai.EnvConfig.botName
 import com.helltar.signai.EnvConfig.botUsername
