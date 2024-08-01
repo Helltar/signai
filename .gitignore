@@ -1,0 +1,10 @@
+.gradle/
+.idea/
+.kotlin/
+
+build/
+deploy/
+data/logs
+
+.env
+Dockerfile
