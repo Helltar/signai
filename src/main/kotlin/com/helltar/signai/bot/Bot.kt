@@ -22,13 +22,14 @@ class Bot(username: String, name: String, avatar: File, private val receiveDelay
 
     private companion object {
         const val COMMAND_CHAT = "chat "
+        const val COMMAND_CHAT_RM = "chatrm"
+        const val MAX_USER_DIALOG_LENGTH_SUM = 15000
     }
 
     private val chatGPT = ChatGPT(openaiAPIKey)
     private val signal = Signal(signalAPIUrl, signalPhoneNumber, signalGroupID)
 
-    private val chatSystemMessageData = Chat.MessageData(CHAT_ROLE_SYSTEM, chatSystemPrompt)
-    private val chatContext = LinkedList<Chat.MessageData>().apply { add(chatSystemMessageData) }
+    private val chatContextMap = hashMapOf<String, LinkedList<Chat.MessageData>>()
 
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -55,12 +56,14 @@ class Bot(username: String, name: String, avatar: File, private val receiveDelay
 
         messagesWithNoReply.forEach { message ->
             message.envelope.dataMessage?.message?.let {
+                val author = message.envelope.source
+                val timestamp = message.envelope.timestamp
+
                 if (it.startsWith(COMMAND_CHAT)) {
                     val text = it.removePrefix(COMMAND_CHAT).trim()
-                    val author = message.envelope.source
-                    val timestamp = message.envelope.timestamp
-                    replyToMessage(text, author, timestamp)
-                }
+                    processChat(text, author, timestamp)
+                } else if (it.trim() == COMMAND_CHAT_RM)
+                    removeUserDialogContext(author, timestamp)
             }
         }
     }
@@ -70,28 +73,45 @@ class Bot(username: String, name: String, avatar: File, private val receiveDelay
             val text = it.envelope.dataMessage!!.message!!
             val author = it.envelope.source
             val timestamp = it.envelope.timestamp
-            replyToMessage(text, author, timestamp)
+            processChat(text, author, timestamp)
         }
     }
 
-    private fun replyToMessage(text: String, replyAuthor: String, replyId: Long) {
+    private fun removeUserDialogContext(replyAuthor: String, replyId: Long) {
+        chatContextMap.remove(replyAuthor)
+        signal.replyToMessage("Context has been removed \uD83D\uDC4C", replyAuthor, replyId)
+    }
+
+    private fun processChat(text: String, replyAuthor: String, replyId: Long) {
         if (text.isBlank()) return
 
         try {
             signal.showTypingIndicator()
 
-            chatContext.add(Chat.MessageData(CHAT_ROLE_USER, text))
+            if (!chatContextMap.containsKey(replyAuthor)) {
+                val chatSystemMessageData = Chat.MessageData(CHAT_ROLE_SYSTEM, chatSystemPrompt)
+                chatContextMap[replyAuthor] = LinkedList(listOf(chatSystemMessageData))
+            }
 
-            if (chatContext.size > 25)
-                chatContext.removeAt(1)
+            chatContextMap[replyAuthor]?.add(Chat.MessageData(CHAT_ROLE_USER, text))
 
-            val answer = chatGPT.sendPrompt(chatContext)
+            var contextLength = getUserDialogLengthSum(replyAuthor)
 
-            chatContext.add(Chat.MessageData(CHAT_ROLE_ASSISTANT, answer))
+            if (contextLength > MAX_USER_DIALOG_LENGTH_SUM) {
+                while (contextLength > MAX_USER_DIALOG_LENGTH_SUM) {
+                    chatContextMap[replyAuthor]?.removeAt(1)
+                    contextLength = getUserDialogLengthSum(replyAuthor)
+                }
+            }
+
+            val answer = chatGPT.sendPrompt(chatContextMap[replyAuthor]!!)
+
+            chatContextMap[replyAuthor]?.add(Chat.MessageData(CHAT_ROLE_ASSISTANT, answer))
+
+            log.debug("{}: {}", replyAuthor, chatContextMap[replyAuthor])
 
             signal.replyToMessage(answer, replyAuthor, replyId)
         } catch (e: Exception) {
-            chatContext.removeAll(chatContext.subList(1, chatContext.size).toSet())
             log.error(e.message)
         } finally {
             signal.showTypingIndicator(false)
@@ -105,4 +125,7 @@ class Bot(username: String, name: String, avatar: File, private val receiveDelay
                 dataMessage.quote.authorNumber == signalPhoneNumber &&
                 dataMessage.message != null
     }
+
+    private fun getUserDialogLengthSum(key: String) =
+        chatContextMap[key]!!.sumOf { it.content.length }
 }
