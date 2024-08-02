@@ -5,6 +5,3 @@
 build/
 deploy/
 data/logs
-
-.env
-Dockerfile
