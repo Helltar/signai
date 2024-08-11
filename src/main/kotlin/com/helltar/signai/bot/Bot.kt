@@ -2,7 +2,6 @@ package com.helltar.signai.bot
 
 import com.helltar.signai.EnvConfig.signalAPIUrl
 import com.helltar.signai.EnvConfig.signalPhoneNumber
-import com.helltar.signai.commands.CommandExecutor
 import com.helltar.signai.commands.chat.Chat
 import com.helltar.signai.signal.Signal
 import com.helltar.signai.signal.model.Receive

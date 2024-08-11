@@ -1,6 +1,7 @@
-package com.helltar.signai.commands
+package com.helltar.signai.bot
 
 import com.helltar.signai.Strings
+import com.helltar.signai.commands.BotCommand
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
