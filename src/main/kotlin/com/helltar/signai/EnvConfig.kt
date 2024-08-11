@@ -9,7 +9,6 @@ object EnvConfig {
 
     val signalAPIUrl = readEnv("SIGNAL_API_URL")
     val signalPhoneNumber = readEnv("SIGNAL_PHONE_NUMBER")
-    val signalGroupID = readEnv("SIGNAL_GROUP_ID")
 
     val botName = readEnv("BOT_NAME")
     val botUsername = readEnv("BOT_USERNAME")
