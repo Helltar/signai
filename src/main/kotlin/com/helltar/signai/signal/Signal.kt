@@ -13,7 +13,6 @@ import com.helltar.signai.utils.NetworkUtils.httpPost
 import com.helltar.signai.utils.NetworkUtils.httpPut
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.*
 
@@ -24,19 +23,17 @@ class Signal(private val apiUrl: String, private val phoneNumber: String) {
     }
 
     private val json = Json { ignoreUnknownKeys = true }
-    private val log = LoggerFactory.getLogger(javaClass)
 
-    fun receive(): List<Receive.Response> {
+    fun receive(timeoutSec: Int = 1, ignoreAttachments: Boolean = true): List<Receive.Response> {
         val url = "$apiUrl/$API_VERSION/receive/$phoneNumber"
-        val responseJson = httpGet(url)
-        log.debug(responseJson)
+        val parameters = listOf("timeout" to "$timeoutSec", "ignore_attachments" to "$ignoreAttachments")
+        val responseJson = httpGet(url, parameters)
         return json.runCatching { decodeFromString<List<Receive.Response>>(responseJson) }.getOrDefault(listOf())
     }
 
     fun listGroups(): List<Groups.Response> {
         val url = "$apiUrl/$API_VERSION/groups/$phoneNumber"
         val responseJson = httpGet(url)
-        log.debug(responseJson)
         return json.runCatching { decodeFromString<List<Groups.Response>>(responseJson) }.getOrDefault(listOf())
     }
 
