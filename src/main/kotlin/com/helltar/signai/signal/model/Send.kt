@@ -1,11 +1,11 @@
-package com.helltar.signai.signal.models
+package com.helltar.signai.signal.model
 
 import kotlinx.serialization.Serializable
 
 object Send {
 
     @Serializable
-    data class RequestData(
+    data class Request(
         val message: String,
         val number: String,
         val quote_author: String,

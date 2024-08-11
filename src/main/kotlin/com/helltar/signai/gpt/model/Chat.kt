@@ -1,4 +1,4 @@
-package com.helltar.signai.gpt.models
+package com.helltar.signai.gpt.model
 
 import kotlinx.serialization.Serializable
 
@@ -12,33 +12,33 @@ object Chat {
     const val CHAT_ROLE_SYSTEM = "system"
 
     @Serializable
-    data class RequestData(
+    data class Request(
         val model: String,
-        val messages: List<MessageData>
+        val messages: List<Message>
     )
 
     @Serializable
-    data class ResponseData(
+    data class Response(
         val model: String,
-        val choices: List<ChoiceData>,
-        val usage: UsageData
+        val choices: List<Choice>,
+        val usage: Usage
     )
 
     @Serializable
-    data class MessageData(
+    data class Message(
         val role: String,
         val content: String
     )
 
     @Serializable
-    data class ChoiceData(
+    data class Choice(
         val index: Int,
-        val message: MessageData,
+        val message: Message,
         val finish_reason: String
     )
 
     @Serializable
-    data class UsageData(
+    data class Usage(
         val prompt_tokens: Int,
         val completion_tokens: Int,
         val total_tokens: Int
