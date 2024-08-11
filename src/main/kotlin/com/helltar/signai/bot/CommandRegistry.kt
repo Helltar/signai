@@ -15,9 +15,13 @@ class CommandRegistry {
     }
 
     private fun registerCommands() {
-        commandHandlers["chat"] = { envelope: Receive.Envelope -> Chat(envelope) }
-        commandHandlers["chatrm"] = { envelope: Receive.Envelope -> ChatRm(envelope) }
-        commandHandlers["chatctx"] = { envelope: Receive.Envelope -> ChatCtx(envelope) }
+        registerCommand("chat", ::Chat)
+        registerCommand("chatrm", ::ChatRm)
+        registerCommand("chatctx", ::ChatCtx)
+    }
+
+    private fun registerCommand(command: String, handler: (Receive.Envelope) -> BotCommand) {
+        commandHandlers[command] = handler
     }
 
     fun getHandler(command: String) =
