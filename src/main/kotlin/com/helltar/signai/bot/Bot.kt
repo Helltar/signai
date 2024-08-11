@@ -57,7 +57,7 @@ class Bot(username: String, name: String, avatar: File) {
                 val command = text.split(" ").first()
 
                 commandRegistry.getHandler(command)?.let {
-                    val envelope = message.envelope.apply { this.dataMessage?.message = text.removePrefix(command) }
+                    val envelope = message.envelope.apply { this.dataMessage?.message = text.removePrefix(command).trim() }
                     commandExecutor.execute(it(envelope))
                 }
             }
