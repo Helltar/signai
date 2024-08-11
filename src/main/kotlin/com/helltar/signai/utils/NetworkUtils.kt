@@ -15,15 +15,16 @@ object NetworkUtils {
     private val log = LoggerFactory.getLogger(javaClass)
 
     fun httpGet(url: String, parameters: Parameters = listOf()): String {
-        val response =
+        val responseResult =
             url.httpGet(parameters)
                 .timeout(TIMEOUT)
                 .timeoutRead(TIMEOUT)
-                .response().second
+                .response()
 
+        val response = responseResult.second
         val json = response.data.decodeToString()
 
-        log.debug("$url --> $json")
+        log.debug("{} --> {}", responseResult.first.url, json)
 
         return json
     }
