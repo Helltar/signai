@@ -13,41 +13,24 @@ import org.slf4j.LoggerFactory
 open class Chat(envelope: Receive.Envelope) : BotCommand(envelope) {
 
     private companion object {
-        const val MAX_USER_DIALOG_HISTORY_LENGTH = 10000
-        val userChatContextMap = hashMapOf<String, MutableList<Chat.Message>>()
+        const val MAX_DIALOG_HISTORY_LENGTH = 10000
+        val userChatContext = hashMapOf<String, MutableList<Chat.Message>>()
     }
 
-    protected val userChatDialogHistory: List<Chat.Message>
-        get() = dialogHistory()
+    protected val userDialogHistory: List<Chat.Message>
+        get() = getDialogHistory()
 
     private val log = LoggerFactory.getLogger(javaClass)
 
     override fun run() {
-        val text = messageText.takeIf { it?.isNotBlank() ?: return } ?: return
+        val text = messageText?.takeIf { it.isNotBlank() } ?: return
 
         try {
             showTypingIndicator()
-
-            if (dialogHistory().isEmpty()) {
-                val systemPrompt = Chat.Message(CHAT_ROLE_SYSTEM, chatSystemPrompt)
-                addMessageToHistory(systemPrompt)
-            }
-
-            addMessageToHistory(Chat.Message(CHAT_ROLE_USER, text))
-
-            var dialogLength = dialogHistoryLengthSum()
-
-            if (dialogLength > MAX_USER_DIALOG_HISTORY_LENGTH)
-                while (dialogLength > MAX_USER_DIALOG_HISTORY_LENGTH) {
-                    removeSecondMessageFromHistory()
-                    dialogLength = dialogHistoryLengthSum()
-                }
-
-            val answer = ChatGPT.sendPrompt(dialogHistory())
-
-            addMessageToHistory(Chat.Message(CHAT_ROLE_ASSISTANT, answer))
-
-            replyToMessage(answer)
+            initializeChatIfEmpty()
+            processUserMessage(text)
+            trimDialogHistory()
+            processAssistantResponse()
         } catch (e: Exception) {
             log.error(e.message)
         } finally {
@@ -55,19 +38,40 @@ open class Chat(envelope: Receive.Envelope) : BotCommand(envelope) {
         }
     }
 
-    protected fun clearDialogHistory() =
-        dialogHistory().clear()
-
-    private fun addMessageToHistory(messageData: Chat.Message) =
-        dialogHistory().add(messageData)
-
-    private fun removeSecondMessageFromHistory() {
-        if (dialogHistory().size > 1) dialogHistory().removeAt(1)
+    private fun initializeChatIfEmpty() {
+        if (getDialogHistory().isNotEmpty()) return
+        addMessageToHistory(Chat.Message(CHAT_ROLE_SYSTEM, chatSystemPrompt))
     }
 
-    private fun dialogHistoryLengthSum() =
-        dialogHistory().sumOf { it.content.length }
+    private fun processUserMessage(text: String) {
+        addMessageToHistory(Chat.Message(CHAT_ROLE_USER, text))
+    }
 
-    private fun dialogHistory() =
-        userChatContextMap.getOrPut(userId) { mutableListOf() }
+    private fun trimDialogHistory() {
+        while (getDialogHistoryLength() > MAX_DIALOG_HISTORY_LENGTH) {
+            removeSecondMessageFromHistory()
+        }
+    }
+
+    private fun processAssistantResponse() {
+        val response = ChatGPT.sendPrompt(getDialogHistory())
+        addMessageToHistory(Chat.Message(CHAT_ROLE_ASSISTANT, response))
+        replyToMessage(response)
+    }
+
+    protected fun clearDialogHistory() =
+        getDialogHistory().clear()
+
+    private fun addMessageToHistory(message: Chat.Message) =
+        getDialogHistory().add(message)
+
+    private fun removeSecondMessageFromHistory() {
+        if (getDialogHistory().size > 1) getDialogHistory().removeAt(1)
+    }
+
+    private fun getDialogHistoryLength() =
+        getDialogHistory().sumOf { it.content.length }
+
+    private fun getDialogHistory() =
+        userChatContext.getOrPut(userId) { mutableListOf() }
 }

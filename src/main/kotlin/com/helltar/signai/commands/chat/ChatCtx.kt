@@ -8,8 +8,8 @@ class ChatCtx(envelope: Receive.Envelope) : Chat(envelope) {
 
     override fun run() {
         val text =
-            if (userChatDialogHistory.isNotEmpty()) {
-                userChatDialogHistory
+            if (userDialogHistory.isNotEmpty()) {
+                userDialogHistory
                     .filter { it.role == CHAT_ROLE_USER }
                     .joinToString("\n") { "- ${it.content}" }
             } else
