@@ -11,17 +11,21 @@ class CommandRegistry {
     private val commandHandlers = mutableMapOf<String, (Receive.Envelope) -> BotCommand>()
 
     init {
-        registerCommands()
+        initializeCommands()
     }
 
-    private fun registerCommands() {
-        registerCommand("chat", ::Chat)
-        registerCommand("chatrm", ::ChatRm)
-        registerCommand("chatctx", ::ChatCtx)
+    private fun initializeCommands() {
+        registerCommands(
+            "chat" to ::Chat,
+            "chatrm" to ::ChatRm,
+            "chatctx" to ::ChatCtx
+        )
     }
 
-    private fun registerCommand(command: String, handler: (Receive.Envelope) -> BotCommand) {
-        commandHandlers[command] = handler
+    private fun registerCommands(vararg commands: Pair<String, (Receive.Envelope) -> BotCommand>) {
+        commands.forEach { (command, handler) ->
+            commandHandlers[command] = handler
+        }
     }
 
     fun getHandler(command: String) =
