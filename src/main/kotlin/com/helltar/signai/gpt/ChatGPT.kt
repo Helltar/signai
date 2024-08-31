@@ -20,6 +20,13 @@ object ChatGPT {
         val responseJson = response.data.decodeToString()
         val answer = json.decodeFromString<Chat.Response>(responseJson).choices.first().message.content
 
-        return answer
+        return answer.cleanMarkdown()
     }
+
+    private fun String.cleanMarkdown() =
+        this.replace("\\*\\*(.*?)\\*\\*".toRegex(), "$1")
+            .replace("\\*(.*?)\\*".toRegex(), "$1")
+            .replace("### (.*?)\\n".toRegex(), "$1\n")
+            .replace("## (.*?)\\n".toRegex(), "$1\n")
+            .replace("# (.*?)\\n".toRegex(), "$1\n")
 }
