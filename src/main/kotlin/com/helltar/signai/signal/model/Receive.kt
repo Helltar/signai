@@ -13,6 +13,7 @@ object Receive {
     @Serializable
     data class Envelope(
         val source: String,
+        val sourceName: String? = null,
         val timestamp: Long,
         val dataMessage: DataMessage? = null
     )
