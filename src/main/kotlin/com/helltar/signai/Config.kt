@@ -2,7 +2,7 @@ package com.helltar.signai
 
 import io.github.cdimascio.dotenv.dotenv
 
-object EnvConfig {
+object Config {
 
     val openaiAPIKey = readEnv("OPENAI_API_KEY")
     val chatSystemPrompt = readEnv("CHAT_SYSTEM_PROMPT")

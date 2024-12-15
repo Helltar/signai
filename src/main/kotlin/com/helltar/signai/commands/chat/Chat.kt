@@ -1,6 +1,6 @@
 package com.helltar.signai.commands.chat
 
-import com.helltar.signai.EnvConfig.chatSystemPrompt
+import com.helltar.signai.Config.chatSystemPrompt
 import com.helltar.signai.commands.BotCommand
 import com.helltar.signai.gpt.ChatGPT
 import com.helltar.signai.gpt.model.Chat
