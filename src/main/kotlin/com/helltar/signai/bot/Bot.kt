@@ -9,27 +9,26 @@ import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.io.File
 
-class Bot(username: String, name: String, avatar: File) {
+class Bot(private val username: String, private val name: String, private val avatar: File) {
 
     private val scope = CoroutineScope(Dispatchers.IO)
-
     private val signal = Signal(signalAPIUrl, signalPhoneNumber)
 
     private val commandRegistry = CommandRegistry()
     private val commandExecutor = CommandExecutor(scope)
 
-    private val log = LoggerFactory.getLogger(javaClass)
+    private var isInitialized = false
 
-    init {
-        log.info("set username: ${signal.setUsername(username).data.decodeToString()}")
-        log.info("update profile, name: [$name], avatar size: [${avatar.length()} bytes]")
-        signal.updateProfile(name, avatar)
-        log.info("start ...")
-    }
+    private val log = LoggerFactory.getLogger(javaClass)
 
     fun run() = scope.launch {
         while (isActive) {
             try {
+                if (!isInitialized) {
+                    init()
+                    isInitialized = true
+                }
+
                 val messages = signal.receive()
 
                 if (messages.isNotEmpty()) {
@@ -46,9 +45,17 @@ class Bot(username: String, name: String, avatar: File) {
                 delay(1000)
             } catch (e: Exception) {
                 log.error(e.message)
-                delay(5000)
+                log.info("delay 10 seconds ...")
+                delay(10000)
             }
         }
+    }
+
+    private fun init() {
+        log.info("set username: ${signal.setUsername(username).data.decodeToString()}")
+        log.info("update profile, name: [$name], avatar size: [${avatar.length()} bytes]")
+        signal.updateProfile(name, avatar)
+        log.info("start ...")
     }
 
     private fun handleCommands(messages: List<Receive.Response>) {
