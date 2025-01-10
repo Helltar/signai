@@ -1,0 +1,24 @@
+services:
+
+  signal-cli-rest-api:
+    container_name: signal-cli-api_container
+    image: bbernhard/signal-cli-rest-api:latest
+    restart: unless-stopped
+    environment:
+      - MODE=native
+    volumes:
+      - signal-cli-rest-api_data:/home/.local/share/signal-cli
+
+  signai:
+    container_name: signai_container
+    image: ghcr.io/helltar/signai:alpha
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - signai_data:/app/data
+    depends_on:
+      - signal-cli-rest-api
+
+volumes:
+  signai_data:
+  signal-cli-rest-api_data:
