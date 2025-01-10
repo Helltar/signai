@@ -1,11 +1,8 @@
 package com.helltar.signai.utils
 
-import com.github.kittinunf.fuel.core.Parameters
+import com.github.kittinunf.fuel.*
+import com.github.kittinunf.fuel.core.*
 import com.github.kittinunf.fuel.core.extensions.jsonBody
-import com.github.kittinunf.fuel.httpDelete
-import com.github.kittinunf.fuel.httpGet
-import com.github.kittinunf.fuel.httpPost
-import com.github.kittinunf.fuel.httpPut
 import org.slf4j.LoggerFactory
 
 object NetworkUtils {
@@ -24,18 +21,28 @@ object NetworkUtils {
         val response = responseResult.second
         val json = response.data.decodeToString()
 
+        if (!response.isSuccessful)
+            throw Exception("[GET] request failed: ${response.statusCode} $url $json")
+
         log.debug("{} --> {}", responseResult.first.url, json)
 
         return json
     }
 
-    fun httpPost(url: String, headers: Map<String, String> = mapOf(), jsonBody: String) =
-        url.httpPost()
-            .header(headers)
-            .timeout(TIMEOUT)
-            .timeoutRead(TIMEOUT)
-            .jsonBody(jsonBody)
-            .response().second
+    fun httpPost(url: String, headers: Map<String, String> = mapOf(), jsonBody: String): Response {
+        val response =
+            url.httpPost()
+                .header(headers)
+                .timeout(TIMEOUT)
+                .timeoutRead(TIMEOUT)
+                .jsonBody(jsonBody)
+                .response().second
+
+        if (!response.isSuccessful)
+            throw Exception("[POST] request failed: ${response.statusCode} $url ${response.data.decodeToString()}")
+
+        return response
+    }
 
     fun httpPut(url: String, jsonBody: String) =
         url.httpPut()
