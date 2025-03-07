@@ -5,8 +5,8 @@ import com.helltar.signai.Config.signalPhoneNumber
 import com.helltar.signai.commands.chat.Chat
 import com.helltar.signai.signal.Signal
 import com.helltar.signai.signal.model.Receive
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
-import org.slf4j.LoggerFactory
 import java.io.File
 
 class Bot(private val username: String, private val name: String, private val avatar: File) {
@@ -19,7 +19,9 @@ class Bot(private val username: String, private val name: String, private val av
 
     private var isInitialized = false
 
-    private val log = LoggerFactory.getLogger(javaClass)
+    private companion object {
+        val log = KotlinLogging.logger {}
+    }
 
     fun run() = scope.launch {
         while (isActive) {
@@ -44,18 +46,18 @@ class Bot(private val username: String, private val name: String, private val av
 
                 delay(1000)
             } catch (e: Exception) {
-                log.error(e.message)
-                log.info("delay 10 seconds ...")
+                log.error { e.message }
+                log.info { "delay 10 seconds ..." }
                 delay(10000)
             }
         }
     }
 
     private fun init() {
-        log.info("set username: ${signal.setUsername(username).data.decodeToString()}")
-        log.info("update profile, name: [$name], avatar size: [${avatar.length()} bytes]")
+        log.info { "set username: ${signal.setUsername(username).data.decodeToString()}" }
+        log.info { "update profile, name: [$name], avatar size: [${avatar.length()} bytes]" }
         signal.updateProfile(name, avatar)
-        log.info("start ...")
+        log.info { "start ..." }
     }
 
     private fun handleCommands(messages: List<Receive.Response>) {
