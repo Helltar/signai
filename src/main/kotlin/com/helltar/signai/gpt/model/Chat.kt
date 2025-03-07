@@ -1,5 +1,6 @@
 package com.helltar.signai.gpt.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 object Chat {
@@ -33,13 +34,20 @@ object Chat {
     data class Choice(
         val index: Int,
         val message: Message,
-        val finish_reason: String
+
+        @SerialName("finish_reason")
+        val finishReason: String
     )
 
     @Serializable
     data class Usage(
-        val prompt_tokens: Int,
-        val completion_tokens: Int,
-        val total_tokens: Int
+        @SerialName("prompt_tokens")
+        val promptTokens: Int,
+
+        @SerialName("completion_tokens")
+        val completionTokens: Int,
+
+        @SerialName("total_tokens")
+        val totalTokens: Int
     )
 }
