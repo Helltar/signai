@@ -8,19 +8,18 @@ import com.helltar.signai.gpt.model.Chat.CHAT_ROLE_ASSISTANT
 import com.helltar.signai.gpt.model.Chat.CHAT_ROLE_SYSTEM
 import com.helltar.signai.gpt.model.Chat.CHAT_ROLE_USER
 import com.helltar.signai.signal.model.Receive
-import org.slf4j.LoggerFactory
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 open class Chat(envelope: Receive.Envelope) : BotCommand(envelope) {
 
     private companion object {
         const val MAX_DIALOG_HISTORY_LENGTH = 10000
         val userChatContext = hashMapOf<String, MutableList<Chat.Message>>()
+        val log = KotlinLogging.logger {}
     }
 
     protected val userDialogHistory: List<Chat.Message>
         get() = getDialogHistory()
-
-    private val log = LoggerFactory.getLogger(javaClass)
 
     override fun run() {
         val text = messageText?.takeIf { it.isNotBlank() } ?: return
@@ -32,7 +31,7 @@ open class Chat(envelope: Receive.Envelope) : BotCommand(envelope) {
             trimDialogHistory()
             processAssistantResponse()
         } catch (e: Exception) {
-            log.error(e.message)
+            log.error { e.message }
         } finally {
             showTypingIndicator(false)
         }

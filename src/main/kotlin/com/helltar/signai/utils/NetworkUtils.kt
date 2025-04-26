@@ -1,15 +1,19 @@
 package com.helltar.signai.utils
 
-import com.github.kittinunf.fuel.*
-import com.github.kittinunf.fuel.core.*
+import com.github.kittinunf.fuel.core.Parameters
+import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.extensions.jsonBody
-import org.slf4j.LoggerFactory
+import com.github.kittinunf.fuel.core.isSuccessful
+import com.github.kittinunf.fuel.httpDelete
+import com.github.kittinunf.fuel.httpGet
+import com.github.kittinunf.fuel.httpPost
+import com.github.kittinunf.fuel.httpPut
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 object NetworkUtils {
 
     private const val TIMEOUT = 180000
-
-    private val log = LoggerFactory.getLogger(javaClass)
+    private val log = KotlinLogging.logger {}
 
     fun httpGet(url: String, parameters: Parameters = listOf()): String {
         val responseResult =
@@ -24,7 +28,7 @@ object NetworkUtils {
         if (!response.isSuccessful)
             throw Exception("[GET] request failed: ${response.statusCode} $url $json")
 
-        log.debug("{} --> {}", responseResult.first.url, json)
+        log.debug { "${responseResult.first.url} --> $json" }
 
         return json
     }
