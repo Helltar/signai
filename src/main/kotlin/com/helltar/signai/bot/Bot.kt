@@ -1,5 +1,7 @@
 package com.helltar.signai.bot
 
+import com.helltar.signai.Config.chatSystemPrompt
+import com.helltar.signai.Config.gptModel
 import com.helltar.signai.Config.signalAPIUrl
 import com.helltar.signai.Config.signalPhoneNumber
 import com.helltar.signai.commands.chat.Chat
@@ -56,6 +58,7 @@ class Bot(private val username: String, private val name: String, private val av
     private fun init() {
         log.info { "set username: ${signal.setUsername(username).data.decodeToString()}" }
         log.info { "update profile, name: [$name], avatar size: [${avatar.length()} bytes]" }
+        log.debug { "$signalPhoneNumber, gptModel: $gptModel, systemPrompt: $chatSystemPrompt" }
         signal.updateProfile(name, avatar)
         log.info { "start ..." }
     }
