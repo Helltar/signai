@@ -29,5 +29,5 @@ class CommandRegistry {
     }
 
     fun getHandler(command: String) =
-        commandHandlers[command]
+        commandHandlers[command.lowercase()]
 }
