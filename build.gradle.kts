@@ -1,12 +1,12 @@
 plugins {
-    kotlin("jvm") version "2.2.0"
-    kotlin("plugin.serialization") version "2.2.0"
-    id("com.gradleup.shadow") version "8.3.8"
+    kotlin("jvm") version "2.2.20"
+    kotlin("plugin.serialization") version "2.2.20"
+    id("com.gradleup.shadow") version "9.2.2"
     application
 }
 
 group = "com.helltar"
-version = "0.2.0"
+version = "0.3.0"
 
 repositories {
     mavenCentral()
