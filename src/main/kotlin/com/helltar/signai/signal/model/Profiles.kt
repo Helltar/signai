@@ -1,12 +1,16 @@
 package com.helltar.signai.signal.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 object Profiles {
 
     @Serializable
     data class Request(
-        val base64_avatar: String,
+
+        @SerialName("base64_avatar")
+        val base64Avatar: String,
+
         val name: String,
     )
 }

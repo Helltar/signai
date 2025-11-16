@@ -1,5 +1,6 @@
 package com.helltar.signai.signal.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 object Send {
@@ -8,8 +9,13 @@ object Send {
     data class Request(
         val message: String,
         val number: String,
-        val quote_author: String,
-        val quote_timestamp: Long,
+
+        @SerialName("quote_author")
+        val quoteAuthor: String,
+
+        @SerialName("quote_timestamp")
+        val quoteTimestamp: Long,
+
         val recipients: List<String>
     )
 }

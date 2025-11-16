@@ -13,7 +13,7 @@ abstract class BotCommand(val envelope: Receive.Envelope) {
 
     private val messageId = envelope.timestamp
     private val groupId = envelope.dataMessage?.groupInfo?.groupId
-    private val recipient = groupId?.let { signal.listGroups().find { group -> it == group.internal_id }?.id } ?: envelope.source
+    private val recipient = groupId?.let { signal.listGroups().find { group -> it == group.internalId }?.id } ?: envelope.source
 
     protected val userId = envelope.source
     protected val messageText = envelope.dataMessage?.message
