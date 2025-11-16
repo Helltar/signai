@@ -11,7 +11,7 @@ services:
 
   signai:
     container_name: signai_container
-    image: ghcr.io/helltar/signai:alpha
+    image: ghcr.io/helltar/signai:latest
     restart: unless-stopped
     env_file: .env
     volumes:
