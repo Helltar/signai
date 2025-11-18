@@ -19,20 +19,26 @@ class Bot(private val username: String, private val name: String, private val av
     private val commandRegistry = CommandRegistry()
     private val commandExecutor = CommandExecutor(scope)
 
-    private var isInitialized = false
-
     private companion object {
         val log = KotlinLogging.logger {}
     }
 
-    fun run() = scope.launch {
+    suspend fun start() {
+        init()
+        run().join()
+    }
+
+    private fun init() {
+        log.info { "set username: ${signal.setUsername(username).data.decodeToString()}" }
+        log.info { "update profile, name: [$name], avatar size: [${avatar.length()} bytes]" }
+        log.info { "$signalPhoneNumber, gptModel: $gptModel, systemPrompt: $chatSystemPrompt" }
+        signal.updateProfile(name, avatar)
+        log.info { "start ..." }
+    }
+
+    private fun run() = scope.launch {
         while (isActive) {
             try {
-                if (!isInitialized) {
-                    init()
-                    isInitialized = true
-                }
-
                 val messages = signal.receive()
 
                 if (messages.isNotEmpty()) {
@@ -50,17 +56,9 @@ class Bot(private val username: String, private val name: String, private val av
             } catch (e: Exception) {
                 log.error { e.message }
                 log.info { "delay 10 seconds ..." }
-                delay(10000)
+                delay(10_000)
             }
         }
-    }
-
-    private fun init() {
-        log.info { "set username: ${signal.setUsername(username).data.decodeToString()}" }
-        log.info { "update profile, name: [$name], avatar size: [${avatar.length()} bytes]" }
-        log.info { "$signalPhoneNumber, gptModel: $gptModel, systemPrompt: $chatSystemPrompt" }
-        signal.updateProfile(name, avatar)
-        log.info { "start ..." }
     }
 
     private fun handleCommands(messages: List<Receive.Response>) {

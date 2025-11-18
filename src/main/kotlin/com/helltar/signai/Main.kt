@@ -7,5 +7,5 @@ import java.io.File
 
 suspend fun main() {
     val avatar = File("data/avatar.jpg")
-    Bot(botUsername, botName, avatar).run().join()
+    Bot(botUsername, botName, avatar).start()
 }
