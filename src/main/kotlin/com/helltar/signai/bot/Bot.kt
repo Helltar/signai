@@ -33,6 +33,7 @@ class Bot(private val username: String, private val name: String, private val av
         log.info { "update profile, name: [$name], avatar size: [${avatar.length()} bytes]" }
         log.info { "$signalPhoneNumber, gptModel: $gptModel, systemPrompt: $chatSystemPrompt" }
         signal.updateProfile(name, avatar)
+        signal.setAccountSettings(trustMode = "always")
         log.info { "start ..." }
     }
 

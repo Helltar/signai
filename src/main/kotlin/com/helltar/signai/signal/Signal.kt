@@ -6,12 +6,12 @@ import com.helltar.signai.signal.model.Receive
 import com.helltar.signai.signal.model.Send
 import com.helltar.signai.signal.model.TypingIndicator
 import com.helltar.signai.signal.model.accounts.Username
+import com.helltar.signai.signal.model.configuration.Settings
 import com.helltar.signai.signal.model.groups.Groups
 import com.helltar.signai.utils.NetworkUtils.httpDelete
 import com.helltar.signai.utils.NetworkUtils.httpGet
 import com.helltar.signai.utils.NetworkUtils.httpPost
 import com.helltar.signai.utils.NetworkUtils.httpPut
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.util.*
@@ -60,5 +60,11 @@ class Signal(private val apiUrl: String, private val phoneNumber: String) {
         val url = "$apiUrl/$API_VERSION/typing-indicator/$phoneNumber"
         val body = json.encodeToString(TypingIndicator.Request(recipient))
         if (show) httpPut(url, body) else httpDelete(url, body)
+    }
+
+    fun setAccountSettings(trustMode: String): Response {
+        val url = "$apiUrl/$API_VERSION/configuration/$phoneNumber/settings"
+        val body = json.encodeToString(Settings.Request(trustMode))
+        return httpPost(url, jsonBody = body)
     }
 }
