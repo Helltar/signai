@@ -29,3 +29,9 @@ Replace the example values with your own data:
 - `GPT_MODEL` - the GPT model to use
 - `SIGNAL_API_URL` - the URL of your running `signal-cli-rest-api` instance
 - `SIGNAL_PHONE_NUMBER` - the phone number linked to bot Signal account
+
+### Commands
+
+- `chat` - Chat with the bot (Example: `chat How are you?`)
+- `chatctx` - View dialogue history
+- `chatrm` - Clear history
