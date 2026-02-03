@@ -27,7 +27,7 @@ class CommandExecutor(private val scope: CoroutineScope, private val userRequest
 
     fun execute(botCommand: BotCommand) {
         val key = botCommand.envelope.source
-        val isChatCommand = botCommand is Chat
+        val isChatCommand = botCommand::class == Chat::class
 
         val result = tryLaunch(key, checkRateLimit = isChatCommand) { botCommand.run() }
 
