@@ -32,7 +32,7 @@ class Bot(private val username: String, private val name: String, private val av
     private fun init() {
         log.info { "set username: ${signal.setUsername(username).data.decodeToString()}" }
         log.info { "update profile, name: [$name], avatar size: [${avatar.length()} bytes]" }
-        log.info { "$signalPhoneNumber, gptModel: $gptModel, systemPrompt: $chatSystemPrompt" }
+        log.info { "$signalPhoneNumber, gptModel: $gptModel, userRPH: $userRPH, systemPrompt: $chatSystemPrompt" }
         signal.updateProfile(name, avatar)
         signal.setAccountSettings(trustMode = "always")
         log.info { "start ..." }
