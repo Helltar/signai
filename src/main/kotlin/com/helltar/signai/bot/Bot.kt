@@ -4,6 +4,7 @@ import com.helltar.signai.Config.chatSystemPrompt
 import com.helltar.signai.Config.gptModel
 import com.helltar.signai.Config.signalAPIUrl
 import com.helltar.signai.Config.signalPhoneNumber
+import com.helltar.signai.Config.userRPH
 import com.helltar.signai.commands.chat.Chat
 import com.helltar.signai.signal.Signal
 import com.helltar.signai.signal.model.Receive
@@ -17,7 +18,7 @@ class Bot(private val username: String, private val name: String, private val av
     private val signal = Signal(signalAPIUrl, signalPhoneNumber)
 
     private val commandRegistry = CommandRegistry()
-    private val commandExecutor = CommandExecutor(scope)
+    private val commandExecutor = CommandExecutor(scope, userRequestsPerHour = userRPH)
 
     private companion object {
         val log = KotlinLogging.logger {}

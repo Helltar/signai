@@ -9,13 +9,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
 
-class CommandExecutor(private val scope: CoroutineScope) {
+class CommandExecutor(private val scope: CoroutineScope, private val userRequestsPerHour: Int) {
 
     private val requestsMap = hashMapOf<String, Job>()
     private val requestTimestamps = hashMapOf<String, MutableList<Long>>()
 
     private companion object {
-        const val LIMIT_COUNT = 5
         const val LIMIT_WINDOW = 3600_000L
         val log = KotlinLogging.logger {}
     }
@@ -52,7 +51,7 @@ class CommandExecutor(private val scope: CoroutineScope) {
 
             timestamps.removeAll { it < windowStart }
 
-            if (timestamps.size >= LIMIT_COUNT) {
+            if (timestamps.size >= userRequestsPerHour) {
                 val oldestRequestTime = timestamps.first()
                 val unblockTime = oldestRequestTime + LIMIT_WINDOW
                 val waitMs = unblockTime - currentTime
@@ -63,7 +62,7 @@ class CommandExecutor(private val scope: CoroutineScope) {
 
             timestamps.add(currentTime)
 
-            log.debug { "chat launch --> $key (requests: ${timestamps.size} / $LIMIT_COUNT)" }
+            log.debug { "chat launch --> $key (requests: ${timestamps.size} / $userRequestsPerHour)" }
         }
 
         requestsMap[key] = scope.launch { block() }
