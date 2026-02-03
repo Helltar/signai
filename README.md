@@ -16,6 +16,7 @@ docker run -d \
   -e OPENAI_API_KEY=sk-proj-qwerty \
   -e CHAT_SYSTEM_PROMPT="You are in a Signal group chat." \
   -e GPT_MODEL=gpt-5.2 \
+  -e REQUESTS_PER_USER_PER_HOUR=10 \
   -e SIGNAL_API_URL=http://signal-cli-rest-api:8080 \
   -e SIGNAL_PHONE_NUMBER=+380980000000 \
   ghcr.io/helltar/signai:latest
@@ -27,6 +28,7 @@ Replace the example values with your own data:
 - `OPENAI_API_KEY` - your OpenAI API key
 - `CHAT_SYSTEM_PROMPT` - the system prompt for the chat
 - `GPT_MODEL` - the GPT model to use
+- `REQUESTS_PER_USER_PER_HOUR` - per-user hourly request limit for the chat command
 - `SIGNAL_API_URL` - the URL of your running `signal-cli-rest-api` instance
 - `SIGNAL_PHONE_NUMBER` - the phone number linked to bot Signal account
 
