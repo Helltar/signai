@@ -31,7 +31,7 @@ open class Chat(envelope: Receive.Envelope) : BotCommand(envelope) {
             trimDialogHistory()
             processAssistantResponse()
         } catch (e: Exception) {
-            log.error { e.message }
+            log.error(e) { "chat error $userId" }
         } finally {
             showTypingIndicator(false)
         }
