@@ -1,10 +1,11 @@
 package com.helltar.signai.commands.chat
 
 import com.helltar.signai.Strings
+import com.helltar.signai.commands.ChatDeps
 import com.helltar.signai.gpt.model.Chat.CHAT_ROLE_USER
 import com.helltar.signai.signal.model.Receive
 
-class ChatCtx(envelope: Receive.Envelope) : Chat(envelope) {
+class ChatCtx(envelope: Receive.Envelope, deps: ChatDeps) : Chat(envelope, deps) {
 
     override suspend fun run() {
         replyToMessage(constructUserDialogText())

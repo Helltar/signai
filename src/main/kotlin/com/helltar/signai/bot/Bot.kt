@@ -1,24 +1,26 @@
 package com.helltar.signai.bot
 
-import com.helltar.signai.Config.chatSystemPrompt
-import com.helltar.signai.Config.gptModel
-import com.helltar.signai.Config.signalAPIUrl
-import com.helltar.signai.Config.signalPhoneNumber
-import com.helltar.signai.Config.userRPH
+import com.helltar.signai.Config
+import com.helltar.signai.commands.ChatDeps
+import com.helltar.signai.commands.CommandDeps
 import com.helltar.signai.commands.chat.Chat
+import com.helltar.signai.gpt.ChatGPT
+import com.helltar.signai.network.KtorClient
 import com.helltar.signai.signal.Signal
 import com.helltar.signai.signal.model.Receive
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
-import java.io.File
 
-class Bot(private val username: String, private val name: String, private val avatar: File) {
+class Bot(private val config: Config.BotConfig) {
 
+    private val signal = Signal(config.signalAPIUrl, config.signalPhoneNumber, KtorClient)
+    private val chatGPT = ChatGPT(config.openaiAPIKey, config.gptModel, KtorClient)
+
+    private val chatDeps = ChatDeps(CommandDeps(signal), config.chatSystemPrompt, chatGPT)
+
+    private val commandRegistry = CommandRegistry(chatDeps)
     private val scope = CoroutineScope(Dispatchers.IO)
-    private val signal = Signal(signalAPIUrl, signalPhoneNumber)
-
-    private val commandRegistry = CommandRegistry()
-    private val commandExecutor = CommandExecutor(scope, userRequestsPerHour = userRPH)
+    private val commandExecutor = CommandExecutor(scope, userRequestsPerHour = config.userRPH)
 
     private companion object {
         val log = KotlinLogging.logger {}
@@ -30,13 +32,12 @@ class Bot(private val username: String, private val name: String, private val av
     }
 
     private suspend fun init() {
-        val usernameResponse = signal.setUsername(username)
-        log.info { "set username: $usernameResponse" }
-        log.info { "update profile, name: [$name], avatar size: [${avatar.length()} bytes]" }
-        log.info { "$signalPhoneNumber, gptModel: $gptModel, userRPH: $userRPH, systemPrompt: $chatSystemPrompt" }
-        signal.updateProfile(name, avatar)
+        log.info { "⚙️ bot config: ${config.toSafeLog()}" }
+        val usernameResponse = signal.setUsername(config.botUsername)
+        log.info { "ℹ\uFE0F set username response: $usernameResponse" }
+        signal.updateProfile(config.botName, config.avatar)
         signal.setAccountSettings(trustMode = "always")
-        log.info { "start ..." }
+        log.info { "🚀 start ..." }
     }
 
     private fun run() = scope.launch {
@@ -51,14 +52,14 @@ class Bot(private val username: String, private val name: String, private val av
                     handleCommands(messagesWithNoReply)
 
                     messagesWithReplyToBot.forEach {
-                        commandExecutor.execute(Chat(it.envelope))
+                        commandExecutor.execute(Chat(it.envelope, chatDeps))
                     }
                 }
 
                 delay(1000)
             } catch (e: Exception) {
-                log.error { e.message }
-                log.info { "delay 10 seconds ..." }
+                log.error(e) { "❌ bot loop failed: ${e::class.simpleName}: ${e.message}" }
+                log.info { "⏳ delay 10 seconds before retry ..." }
                 delay(10_000)
             }
         }
@@ -82,7 +83,7 @@ class Bot(private val username: String, private val name: String, private val av
         val dataMessage = response.envelope.dataMessage
 
         return dataMessage?.quote != null &&
-                dataMessage.quote.authorNumber == signalPhoneNumber &&
+                dataMessage.quote.authorNumber == config.signalPhoneNumber &&
                 dataMessage.message != null
     }
 }

@@ -1,12 +1,9 @@
 package com.helltar.signai.commands
 
-import com.helltar.signai.Config.signalAPIUrl
-import com.helltar.signai.Config.signalPhoneNumber
-import com.helltar.signai.signal.Signal
 import com.helltar.signai.signal.model.Receive
 import java.util.*
 
-abstract class BotCommand(val envelope: Receive.Envelope) {
+abstract class BotCommand(val envelope: Receive.Envelope, commandDeps: CommandDeps) {
 
     private companion object {
         val BASE64_ENCODER: Base64.Encoder = Base64.getEncoder()
@@ -14,7 +11,7 @@ abstract class BotCommand(val envelope: Receive.Envelope) {
 
     abstract suspend fun run()
 
-    private val signal = Signal(signalAPIUrl, signalPhoneNumber)
+    private val signal = commandDeps.signal
 
     private val messageId = envelope.timestamp
     private val groupId = envelope.dataMessage?.groupInfo?.groupId // internal_id

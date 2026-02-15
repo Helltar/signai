@@ -1,24 +1,18 @@
 package com.helltar.signai.signal
 
 import com.helltar.signai.network.HttpClient
-import com.helltar.signai.network.KtorClient
 import com.helltar.signai.signal.model.Profiles
 import com.helltar.signai.signal.model.Receive
 import com.helltar.signai.signal.model.Send
 import com.helltar.signai.signal.model.TypingIndicator
 import com.helltar.signai.signal.model.accounts.Username
 import com.helltar.signai.signal.model.configuration.Settings
-import com.helltar.signai.signal.model.groups.Groups
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.util.*
 
-class Signal(
-    private val apiUrl: String,
-    private val phoneNumber: String,
-    private val httpClient: HttpClient = KtorClient
-) {
+class Signal(private val apiUrl: String, private val phoneNumber: String, private val httpClient: HttpClient) {
 
     private companion object {
         const val API_VERSION = "v1"
@@ -30,14 +24,7 @@ class Signal(
         val url = "$apiUrl/$API_VERSION/receive/$phoneNumber"
         val parameters = listOf("timeout" to "$timeoutSec", "ignore_attachments" to "$ignoreAttachments")
         val responseJson = httpClient.get(url, parameters)
-        return json.runCatching { decodeFromString<List<Receive.Response>>(responseJson) }.getOrDefault(listOf())
-    }
-
-    @Suppress("unused")
-    suspend fun listGroups(): List<Groups.Response> {
-        val url = "$apiUrl/$API_VERSION/groups/$phoneNumber"
-        val responseJson = httpClient.get(url)
-        return json.runCatching { decodeFromString<List<Groups.Response>>(responseJson) }.getOrDefault(listOf())
+        return json.decodeFromString(responseJson)
     }
 
     suspend fun replyToMessage(text: String, replyAuthor: String, replyId: Long, recipient: String): String {

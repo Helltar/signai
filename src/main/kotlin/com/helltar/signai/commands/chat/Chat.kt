@@ -1,20 +1,20 @@
 package com.helltar.signai.commands.chat
 
-import com.helltar.signai.Config.chatSystemPrompt
 import com.helltar.signai.commands.BotCommand
-import com.helltar.signai.gpt.ChatGPT
+import com.helltar.signai.commands.ChatDeps
 import com.helltar.signai.gpt.model.Chat
 import com.helltar.signai.gpt.model.Chat.CHAT_ROLE_ASSISTANT
 import com.helltar.signai.gpt.model.Chat.CHAT_ROLE_SYSTEM
 import com.helltar.signai.gpt.model.Chat.CHAT_ROLE_USER
 import com.helltar.signai.signal.model.Receive
 import io.github.oshai.kotlinlogging.KotlinLogging
+import java.util.concurrent.ConcurrentHashMap
 
-open class Chat(envelope: Receive.Envelope) : BotCommand(envelope) {
+open class Chat(envelope: Receive.Envelope, private val deps: ChatDeps) : BotCommand(envelope, deps.commandDeps) {
 
     private companion object {
         const val MAX_DIALOG_HISTORY_LENGTH = 16384 // todo: tokens
-        val userChatContext = hashMapOf<String, MutableList<Chat.Message>>()
+        val userChatContext = ConcurrentHashMap<String, MutableList<Chat.Message>>()
         val log = KotlinLogging.logger {}
     }
 
@@ -38,8 +38,8 @@ open class Chat(envelope: Receive.Envelope) : BotCommand(envelope) {
     }
 
     private fun initializeChatIfEmpty() {
-        if (getDialogHistory().isNotEmpty()) return
-        addMessageToHistory(Chat.Message(CHAT_ROLE_SYSTEM, chatSystemPrompt))
+        if (getDialogHistory().isEmpty())
+            addMessageToHistory(Chat.Message(CHAT_ROLE_SYSTEM, deps.chatSystemPrompt))
     }
 
     private fun processUserMessage(text: String) {
@@ -53,7 +53,7 @@ open class Chat(envelope: Receive.Envelope) : BotCommand(envelope) {
     }
 
     private suspend fun processAssistantResponse() {
-        val response = ChatGPT.sendPrompt(getDialogHistory())
+        val response = deps.chatGPT.sendPrompt(getDialogHistory())
         addMessageToHistory(Chat.Message(CHAT_ROLE_ASSISTANT, response))
         replyToMessage(response)
     }
@@ -72,5 +72,5 @@ open class Chat(envelope: Receive.Envelope) : BotCommand(envelope) {
         getDialogHistory().sumOf { it.content.length }
 
     private fun getDialogHistory() =
-        userChatContext.getOrPut(userId) { mutableListOf() }
+        userChatContext.computeIfAbsent(userId) { mutableListOf() }
 }
