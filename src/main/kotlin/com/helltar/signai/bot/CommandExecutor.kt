@@ -15,7 +15,7 @@ class CommandExecutor(private val scope: CoroutineScope, private val userRequest
     private val requestTimestamps = hashMapOf<String, MutableList<Long>>()
 
     private companion object {
-        const val LIMIT_WINDOW = 3600_000L
+        const val SLOWMODE_WINDOW = 3_600_000L
         val log = KotlinLogging.logger {}
     }
 
@@ -47,13 +47,13 @@ class CommandExecutor(private val scope: CoroutineScope, private val userRequest
         if (checkRateLimit) {
             val timestamps = requestTimestamps.getOrPut(key) { mutableListOf() }
             val currentTime = System.currentTimeMillis()
-            val windowStart = currentTime - LIMIT_WINDOW
+            val windowStart = currentTime - SLOWMODE_WINDOW
 
             timestamps.removeAll { it < windowStart }
 
             if (timestamps.size >= userRequestsPerHour) {
                 val oldestRequestTime = timestamps.first()
-                val unblockTime = oldestRequestTime + LIMIT_WINDOW
+                val unblockTime = oldestRequestTime + SLOWMODE_WINDOW
                 val waitMs = unblockTime - currentTime
                 val waitSeconds = if (waitMs > 0) ceil(waitMs / 1000.0).toLong() else 1L
                 log.debug { "rate limit for $key. wait: ${waitSeconds}s" }
