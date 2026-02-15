@@ -14,18 +14,8 @@ object ChatGPT {
         val url = "https://api.openai.com/v1/chat/completions"
         val headers = mapOf("Content-Type" to "application/json", "Authorization" to "Bearer $openaiAPIKey")
         val body = json.encodeToString(Chat.Request(Config.gptModel, messages))
-
         val response = httpPost(url, headers, body)
         val responseJson = response.data.decodeToString()
-        val answer = json.decodeFromString<Chat.Response>(responseJson).choices.first().message.content
-
-        return answer.cleanMarkdown()
+        return json.decodeFromString<Chat.Response>(responseJson).choices.first().message.content
     }
-
-    private fun String.cleanMarkdown() =
-        this.replace("\\*\\*(.*?)\\*\\*".toRegex(), "$1")
-            .replace("\\*(.*?)\\*".toRegex(), "$1")
-            .replace("### (.*?)\\n".toRegex(), "$1\n")
-            .replace("## (.*?)\\n".toRegex(), "$1\n")
-            .replace("# (.*?)\\n".toRegex(), "$1\n")
 }
