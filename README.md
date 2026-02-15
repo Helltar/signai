@@ -22,18 +22,21 @@ docker run -d \
   ghcr.io/helltar/signai:latest
 ```
 
-Replace the example values with your own data:
+| Variable | Description |
+| --- | --- |
+| `BOT_NAME` | Visible Signal profile name for the bot account |
+| `BOT_USERNAME` | Signal username to set for the bot account |
+| `OPENAI_API_KEY` | API key used for OpenAI requests |
+| `CHAT_SYSTEM_PROMPT` | System message injected into each new dialog context |
+| `GPT_MODEL` | OpenAI model name used for chat completions |
+| `REQUESTS_PER_USER_PER_HOUR` | Per-user limit for `chat` requests. Defaults to `30` |
+| `SIGNAL_API_URL` | URL to your `signal-cli-rest-api` service |
+| `SIGNAL_PHONE_NUMBER` | Bot account phone number in Signal |
 
-- `BOT_NAME`, `BOT_USERNAME` - your desired bot name and username
-- `OPENAI_API_KEY` - your OpenAI API key
-- `CHAT_SYSTEM_PROMPT` - the system prompt for the chat
-- `GPT_MODEL` - the GPT model to use
-- `REQUESTS_PER_USER_PER_HOUR` - per-user hourly request limit for the chat command
-- `SIGNAL_API_URL` - the URL of your running `signal-cli-rest-api` instance
-- `SIGNAL_PHONE_NUMBER` - the phone number linked to bot Signal account
+### Bot Commands
 
-### Usage
+- `chat <text>`: Ask the bot (example: `chat How are you?`)
+- `chatctx`: Show current dialog history
+- `chatrm`: Clear dialog history
 
-- `chat` - Chat with the bot (Example: `chat How are you?`)
-- `chatctx` - View dialogue history
-- `chatrm` - Clear history
+**Tip**: If you reply directly to a bot message, it will be processed as a `chat` command automatically.
