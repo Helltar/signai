@@ -21,7 +21,7 @@ object Receive {
     @Serializable
     data class DataMessage(
         val timestamp: Long,
-        var message: String? = null,
+        val message: String? = null,
         val quote: Quote? = null,
         val groupInfo: GroupInfo? = null
     )

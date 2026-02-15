@@ -66,10 +66,11 @@ class Bot(private val username: String, private val name: String, private val av
     private fun handleCommands(messages: List<Receive.Response>) {
         messages.forEach { message ->
             message.envelope.dataMessage?.message?.let { text ->
-                val command = text.split(" ").first()
+                val command = text.substringBefore(' ')
 
                 commandRegistry.getHandler(command)?.let {
-                    val envelope = message.envelope.apply { this.dataMessage?.message = text.removePrefix(command).trim() }
+                    val args = text.substringAfter(' ', "")
+                    val envelope = message.envelope.copy(dataMessage = message.envelope.dataMessage.copy(message = args))
                     commandExecutor.execute(it(envelope))
                 }
             }
