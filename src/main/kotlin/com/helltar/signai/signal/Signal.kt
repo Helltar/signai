@@ -31,6 +31,7 @@ class Signal(private val apiUrl: String, private val phoneNumber: String) {
         return json.runCatching { decodeFromString<List<Receive.Response>>(responseJson) }.getOrDefault(listOf())
     }
 
+    @Suppress("unused")
     fun listGroups(): List<Groups.Response> {
         val url = "$apiUrl/$API_VERSION/groups/$phoneNumber"
         val responseJson = httpGet(url)
