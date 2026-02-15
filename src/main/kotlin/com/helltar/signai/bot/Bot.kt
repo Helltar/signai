@@ -23,6 +23,7 @@ class Bot(private val config: Config.BotConfig) {
     private val commandExecutor = CommandExecutor(scope, userRequestsPerHour = config.userRPH)
 
     private companion object {
+        val whitespaceRegex = Regex("\\s+")
         val log = KotlinLogging.logger {}
     }
 
@@ -68,10 +69,11 @@ class Bot(private val config: Config.BotConfig) {
     private fun handleCommands(messages: List<Receive.Response>) {
         messages.forEach { message ->
             message.envelope.dataMessage?.message?.let { text ->
-                val command = text.substringBefore(' ')
+                val parts = text.trim().split(whitespaceRegex, limit = 2)
+                val command = parts[0]
 
                 commandRegistry.getHandler(command)?.let {
-                    val args = text.substringAfter(' ', "")
+                    val args = parts.getOrNull(1) ?: ""
                     val envelope = message.envelope.copy(dataMessage = message.envelope.dataMessage.copy(message = args))
                     commandExecutor.execute(it(envelope))
                 }
