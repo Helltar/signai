@@ -14,8 +14,11 @@ class CommandExecutor(private val scope: CoroutineScope, private val userRequest
     private val requestsMap = hashMapOf<String, Job>()
     private val requestTimestamps = hashMapOf<String, MutableList<Long>>()
 
+    private var lastCleanupAt = 0L
+
     private companion object {
         const val SLOWMODE_WINDOW = 3_600_000L
+        const val STATE_CLEANUP_INTERVAL = 300_000L
         val log = KotlinLogging.logger {}
     }
 
@@ -39,6 +42,10 @@ class CommandExecutor(private val scope: CoroutineScope, private val userRequest
     }
 
     private fun tryLaunch(key: String, checkRateLimit: Boolean, block: suspend () -> Unit): LaunchResult {
+        val currentTime = System.currentTimeMillis()
+
+        cleanupStaleState(currentTime)
+
         log.debug { "try launch --> $key" }
 
         if (requestsMap[key]?.isActive == true)
@@ -46,7 +53,6 @@ class CommandExecutor(private val scope: CoroutineScope, private val userRequest
 
         if (checkRateLimit) {
             val timestamps = requestTimestamps.getOrPut(key) { mutableListOf() }
-            val currentTime = System.currentTimeMillis()
             val windowStart = currentTime - SLOWMODE_WINDOW
 
             timestamps.removeAll { it < windowStart }
@@ -68,5 +74,21 @@ class CommandExecutor(private val scope: CoroutineScope, private val userRequest
         requestsMap[key] = scope.launch { block() }
 
         return LaunchResult.Success
+    }
+
+    private fun cleanupStaleState(currentTime: Long) {
+        if (currentTime - lastCleanupAt < STATE_CLEANUP_INTERVAL)
+            return
+
+        lastCleanupAt = currentTime
+
+        val windowStart = currentTime - SLOWMODE_WINDOW
+
+        requestsMap.entries.removeIf { !it.value.isActive }
+
+        requestTimestamps.entries.removeIf { entry ->
+            entry.value.removeAll { it < windowStart }
+            entry.value.isEmpty() && requestsMap[entry.key]?.isActive != true
+        }
     }
 }
