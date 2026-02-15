@@ -4,6 +4,8 @@ import io.github.cdimascio.dotenv.dotenv
 
 object Config {
 
+    private val dotenv = dotenv { ignoreIfMissing = true }
+
     val openaiAPIKey = readEnv("OPENAI_API_KEY")
     val chatSystemPrompt = readEnv("CHAT_SYSTEM_PROMPT")
     val gptModel = readEnv("GPT_MODEL")
@@ -16,6 +18,6 @@ object Config {
     val botUsername = readEnv("BOT_USERNAME")
 
     private fun readEnv(env: String) =
-        dotenv { ignoreIfMissing = true }[env].ifBlank { throw IllegalArgumentException("$env env. is blank") }
+        dotenv[env].ifBlank { throw IllegalArgumentException("$env env. is blank") }
             ?: throw IllegalArgumentException("error when read $env env.")
 }
