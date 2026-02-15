@@ -29,8 +29,9 @@ class Bot(private val username: String, private val name: String, private val av
         run().join()
     }
 
-    private fun init() {
-        log.info { "set username: ${signal.setUsername(username).data.decodeToString()}" }
+    private suspend fun init() {
+        val usernameResponse = signal.setUsername(username)
+        log.info { "set username: $usernameResponse" }
         log.info { "update profile, name: [$name], avatar size: [${avatar.length()} bytes]" }
         log.info { "$signalPhoneNumber, gptModel: $gptModel, userRPH: $userRPH, systemPrompt: $chatSystemPrompt" }
         signal.updateProfile(name, avatar)

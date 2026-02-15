@@ -12,7 +12,7 @@ abstract class BotCommand(val envelope: Receive.Envelope) {
         val BASE64_ENCODER: Base64.Encoder = Base64.getEncoder()
     }
 
-    abstract fun run()
+    abstract suspend fun run()
 
     private val signal = Signal(signalAPIUrl, signalPhoneNumber)
 
@@ -22,10 +22,10 @@ abstract class BotCommand(val envelope: Receive.Envelope) {
     protected val userId = envelope.source
     protected val messageText = envelope.dataMessage?.message
 
-    fun replyToMessage(text: String) =
+    suspend fun replyToMessage(text: String) =
         signal.replyToMessage(text, userId, messageId, recipient())
 
-    protected fun showTypingIndicator(show: Boolean = true) =
+    protected suspend fun showTypingIndicator(show: Boolean = true) =
         signal.showTypingIndicator(recipient(), show)
 
     private fun recipient(): String = // internal_id --> id

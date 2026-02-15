@@ -21,7 +21,7 @@ open class Chat(envelope: Receive.Envelope) : BotCommand(envelope) {
     protected val userDialogHistory: List<Chat.Message>
         get() = getDialogHistory()
 
-    override fun run() {
+    override suspend fun run() {
         val text = messageText?.takeIf { it.isNotBlank() } ?: return
 
         try {
@@ -52,7 +52,7 @@ open class Chat(envelope: Receive.Envelope) : BotCommand(envelope) {
         }
     }
 
-    private fun processAssistantResponse() {
+    private suspend fun processAssistantResponse() {
         val response = ChatGPT.sendPrompt(getDialogHistory())
         addMessageToHistory(Chat.Message(CHAT_ROLE_ASSISTANT, response))
         replyToMessage(response)

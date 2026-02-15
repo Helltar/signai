@@ -6,7 +6,7 @@ import com.helltar.signai.signal.model.Receive
 
 class ChatCtx(envelope: Receive.Envelope) : Chat(envelope) {
 
-    override fun run() {
+    override suspend fun run() {
         replyToMessage(constructUserDialogText())
     }
 
