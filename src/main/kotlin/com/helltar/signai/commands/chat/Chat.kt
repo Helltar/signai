@@ -13,7 +13,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 open class Chat(envelope: Receive.Envelope) : BotCommand(envelope) {
 
     private companion object {
-        const val MAX_DIALOG_HISTORY_LENGTH = 15000
+        const val MAX_DIALOG_HISTORY_LENGTH = 16384 // todo: tokens
         val userChatContext = hashMapOf<String, MutableList<Chat.Message>>()
         val log = KotlinLogging.logger {}
     }
