@@ -5,7 +5,7 @@ signai
 
 Install and configure [signal-cli-rest-api](https://github.com/bbernhard/signal-cli-rest-api).
 
-### Run with Docker
+### Docker
 
 ```bash
 docker run -d \
@@ -32,7 +32,7 @@ Replace the example values with your own data:
 - `SIGNAL_API_URL` - the URL of your running `signal-cli-rest-api` instance
 - `SIGNAL_PHONE_NUMBER` - the phone number linked to bot Signal account
 
-### Commands
+### Usage
 
 - `chat` - Chat with the bot (Example: `chat How are you?`)
 - `chatctx` - View dialogue history
