@@ -15,7 +15,7 @@ docker run -d \
   -e BOT_USERNAME=signai \
   -e OPENAI_API_KEY=sk-proj-qwerty \
   -e CHAT_SYSTEM_PROMPT="You are in a Signal group chat." \
-  -e GPT_MODEL=gpt-5.2 \
+  -e GPT_MODEL=gpt-5.4 \
   -e REQUESTS_PER_USER_PER_HOUR=10 \
   -e SIGNAL_API_URL=http://signal-cli-rest-api:8080 \
   -e SIGNAL_PHONE_NUMBER=+380980000000 \
