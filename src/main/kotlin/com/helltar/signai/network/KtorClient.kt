@@ -4,9 +4,11 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
+import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.websocket.*
 
 object KtorClient : HttpClient {
 
@@ -21,6 +23,8 @@ object KtorClient : HttpClient {
                 connectTimeoutMillis = TIMEOUT
                 socketTimeoutMillis = TIMEOUT
             }
+
+            install(WebSockets)
         }
 
     private val log = KotlinLogging.logger {}
@@ -71,5 +75,17 @@ object KtorClient : HttpClient {
             }
 
         return response.bodyAsText()
+    }
+
+    override suspend fun webSocket(url: String, onTextFrame: suspend (String) -> Unit) {
+        client.webSocket(urlString = url) {
+            for (frame in incoming) {
+                if (frame is Frame.Text) {
+                    val text = frame.readText()
+                    log.debug { "$url --> $text" }
+                    onTextFrame(text)
+                }
+            }
+        }
     }
 }

@@ -6,4 +6,5 @@ interface HttpClient {
     suspend fun post(url: String, headers: Map<String, String> = mapOf(), body: String): String
     suspend fun put(url: String, body: String): String
     suspend fun delete(url: String, body: String): String
+    suspend fun webSocket(url: String, onTextFrame: suspend (String) -> Unit)
 }

@@ -15,6 +15,7 @@ repositories {
 dependencies {
     implementation("io.ktor:ktor-client-core:3.4.1")
     implementation("io.ktor:ktor-client-cio:3.4.1")
+    implementation("io.ktor:ktor-client-websockets:3.4.1")
     implementation("io.ktor:ktor-serialization-kotlinx-json:3.4.1")
     implementation("io.github.cdimascio:dotenv-kotlin:6.5.1")
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.01")

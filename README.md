@@ -3,7 +3,7 @@ signai
 
 ### Prerequisites
 
-Install and configure [signal-cli-rest-api](https://github.com/bbernhard/signal-cli-rest-api).
+Install and configure [signal-cli-rest-api](https://github.com/bbernhard/signal-cli-rest-api) in `json-rpc-native` mode.
 
 ### Docker
 

@@ -10,6 +10,7 @@ import com.helltar.signai.signal.Signal
 import com.helltar.signai.signal.model.Receive
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
+import kotlin.time.Duration.Companion.seconds
 
 class Bot(private val config: Config.BotConfig) {
 
@@ -44,24 +45,19 @@ class Bot(private val config: Config.BotConfig) {
     private fun run() = scope.launch {
         while (isActive) {
             try {
-                val messages = signal.receive()
+                signal.receiveEach { message ->
+                    if (message.envelope.dataMessage?.quote == null) {
+                        handleCommands(listOf(message))
+                    }
 
-                if (messages.isNotEmpty()) {
-                    val messagesWithNoReply = messages.filter { it.envelope.dataMessage?.quote == null }
-                    val messagesWithReplyToBot = messages.filter { isValidReply(it) }
-
-                    handleCommands(messagesWithNoReply)
-
-                    messagesWithReplyToBot.forEach {
-                        commandExecutor.execute(Chat(it.envelope, chatDeps))
+                    if (isValidReply(message)) {
+                        commandExecutor.execute(Chat(message.envelope, chatDeps))
                     }
                 }
-
-                delay(1000)
             } catch (e: Exception) {
                 log.error(e) { "❌ bot loop failed: ${e::class.simpleName}: ${e.message}" }
                 log.info { "⏳ delay 10 seconds before retry ..." }
-                delay(10_000)
+                delay(10.seconds)
             }
         }
     }

@@ -8,7 +8,9 @@ import com.helltar.signai.signal.model.TypingIndicator
 import com.helltar.signai.signal.model.accounts.Username
 import com.helltar.signai.signal.model.configuration.Settings
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import java.io.File
 import java.util.*
 
@@ -20,11 +22,16 @@ class Signal(private val apiUrl: String, private val phoneNumber: String, privat
         val log = KotlinLogging.logger {}
     }
 
-    suspend fun receive(timeoutSec: Int = 1, ignoreAttachments: Boolean = true): List<Receive.Response> {
-        val url = "$apiUrl/$API_VERSION/receive/$phoneNumber"
-        val parameters = listOf("timeout" to "$timeoutSec", "ignore_attachments" to "$ignoreAttachments")
-        val responseJson = httpClient.get(url, parameters)
-        return json.decodeFromString(responseJson)
+    suspend fun receiveEach(ignoreAttachments: Boolean = true, onReceive: suspend (Receive.Response) -> Unit) {
+        val url = buildReceiveWebSocketUrl(ignoreAttachments)
+
+        log.info { "connecting to signal receive websocket: $url" }
+
+        httpClient.webSocket(url) { responseJson ->
+            for (message in decodeReceiveResponse(responseJson)) {
+                onReceive(message)
+            }
+        }
     }
 
     suspend fun replyToMessage(text: String, replyAuthor: String, replyId: Long, recipient: String): String {
@@ -58,4 +65,21 @@ class Signal(private val apiUrl: String, private val phoneNumber: String, privat
         val body = json.encodeToString(Settings.Request(trustMode))
         return httpClient.post(url, body = body)
     }
+
+    private fun buildReceiveWebSocketUrl(ignoreAttachments: Boolean): String {
+        val websocketApiUrl =
+            when {
+                apiUrl.startsWith("https://") -> "wss://${apiUrl.removePrefix("https://")}"
+                apiUrl.startsWith("http://") -> "ws://${apiUrl.removePrefix("http://")}"
+                else -> apiUrl
+            }.trimEnd('/')
+
+        return "$websocketApiUrl/$API_VERSION/receive/$phoneNumber?ignore_attachments=$ignoreAttachments"
+    }
+
+    private fun decodeReceiveResponse(responseJson: String): List<Receive.Response> =
+        when (val jsonElement = json.parseToJsonElement(responseJson)) {
+            is JsonArray -> json.decodeFromJsonElement(ListSerializer(Receive.Response.serializer()), jsonElement)
+            else -> listOf(json.decodeFromJsonElement(Receive.Response.serializer(), jsonElement))
+        }
 }

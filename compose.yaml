@@ -5,7 +5,7 @@ services:
     image: bbernhard/signal-cli-rest-api:latest
     restart: unless-stopped
     environment:
-      - MODE=native
+      - MODE=json-rpc-native
     volumes:
       - signal-cli-rest-api_data:/home/.local/share/signal-cli
 
