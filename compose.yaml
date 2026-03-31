@@ -6,6 +6,7 @@ services:
     restart: unless-stopped
     environment:
       - MODE=json-rpc-native
+      - JSON_RPC_TRUST_NEW_IDENTITIES=always
     volumes:
       - signal-cli-rest-api_data:/home/.local/share/signal-cli
 

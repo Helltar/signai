@@ -38,7 +38,6 @@ class Bot(private val config: Config.BotConfig) {
         val usernameResponse = signal.setUsername(config.botUsername)
         log.info { "ℹ\uFE0F set username response: $usernameResponse" }
         signal.updateProfile(config.botName, config.avatar)
-        signal.setAccountSettings(trustMode = "always")
         log.info { "🚀 start ..." }
     }
 

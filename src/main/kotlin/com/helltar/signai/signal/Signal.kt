@@ -60,6 +60,7 @@ class Signal(private val apiUrl: String, private val phoneNumber: String, privat
         if (show) httpClient.put(url, body) else httpClient.delete(url, body)
     }
 
+    @Suppress("unused")
     suspend fun setAccountSettings(trustMode: String): String {
         val url = "$apiUrl/$API_VERSION/configuration/$phoneNumber/settings"
         val body = json.encodeToString(Settings.Request(trustMode))
