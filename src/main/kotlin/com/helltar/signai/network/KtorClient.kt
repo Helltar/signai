@@ -12,26 +12,35 @@ import io.ktor.websocket.*
 
 object KtorClient : HttpClient {
 
-    private const val TIMEOUT = 180_000L
-
-    private val client =
+    private val httpClient =
         HttpClient(CIO) {
             expectSuccess = true
 
             install(HttpTimeout) {
-                requestTimeoutMillis = TIMEOUT
-                connectTimeoutMillis = TIMEOUT
-                socketTimeoutMillis = TIMEOUT
+                requestTimeoutMillis = 180_000
+                connectTimeoutMillis = 30_000
+                socketTimeoutMillis = 180_000
+            }
+        }
+
+    private val wsClient =
+        HttpClient(CIO) {
+            expectSuccess = true
+
+            install(HttpTimeout) {
+                connectTimeoutMillis = 30_000
             }
 
-            install(WebSockets)
+            install(WebSockets) {
+                pingIntervalMillis = 20_000
+            }
         }
 
     private val log = KotlinLogging.logger {}
 
     override suspend fun get(url: String, parameters: List<Pair<String, String>>): String {
         val response =
-            client.get(url) {
+            httpClient.get(url) {
                 url {
                     parameters.forEach { (key, value) ->
                         this.parameters.append(key, value)
@@ -48,7 +57,7 @@ object KtorClient : HttpClient {
 
     override suspend fun post(url: String, headers: Map<String, String>, body: String): String {
         val response =
-            client.post(url) {
+            httpClient.post(url) {
                 headers.forEach { (key, value) -> header(key, value) }
                 contentType(ContentType.Application.Json)
                 setBody(body)
@@ -59,7 +68,7 @@ object KtorClient : HttpClient {
 
     override suspend fun put(url: String, body: String): String {
         val response =
-            client.put(url) {
+            httpClient.put(url) {
                 contentType(ContentType.Application.Json)
                 setBody(body)
             }
@@ -69,7 +78,7 @@ object KtorClient : HttpClient {
 
     override suspend fun delete(url: String, body: String): String {
         val response =
-            client.delete(url) {
+            httpClient.delete(url) {
                 contentType(ContentType.Application.Json)
                 setBody(body)
             }
@@ -78,7 +87,7 @@ object KtorClient : HttpClient {
     }
 
     override suspend fun webSocket(url: String, onTextFrame: suspend (String) -> Unit) {
-        client.webSocket(urlString = url) {
+        wsClient.webSocket(urlString = url) {
             for (frame in incoming) {
                 if (frame is Frame.Text) {
                     val text = frame.readText()
