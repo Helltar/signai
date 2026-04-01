@@ -10,7 +10,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.websocket.*
 
-object KtorClient : HttpClient {
+object KtorClient : NetworkClient {
 
     private val httpClient =
         HttpClient(CIO) {

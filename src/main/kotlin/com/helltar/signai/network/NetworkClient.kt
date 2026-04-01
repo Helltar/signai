@@ -1,6 +1,6 @@
 package com.helltar.signai.network
 
-interface HttpClient {
+interface NetworkClient {
 
     suspend fun get(url: String, parameters: List<Pair<String, String>> = listOf()): String
     suspend fun post(url: String, headers: Map<String, String> = mapOf(), body: String): String
