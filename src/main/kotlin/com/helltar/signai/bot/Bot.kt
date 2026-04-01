@@ -18,10 +18,11 @@ class Bot(private val config: Config.BotConfig) {
     private val chatGPT = ChatGPT(config.openaiAPIKey, config.gptModel, KtorClient)
 
     private val chatDeps = ChatDeps(CommandDeps(signal), config.chatSystemPrompt, chatGPT)
-
     private val commandRegistry = CommandRegistry(chatDeps)
-    private val scope = CoroutineScope(Dispatchers.IO)
-    private val commandExecutor = CommandExecutor(scope, userRequestsPerHour = config.userRPH)
+
+    private val receiveScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val commandScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val commandExecutor = CommandExecutor(commandScope, userRequestsPerHour = config.userRPH)
 
     private companion object {
         val whitespaceRegex = Regex("\\s+")
@@ -41,7 +42,7 @@ class Bot(private val config: Config.BotConfig) {
         log.info { "🚀 start ..." }
     }
 
-    private fun run() = scope.launch {
+    private fun run() = receiveScope.launch {
         while (isActive) {
             try {
                 signal.receiveEach { message ->
@@ -53,6 +54,12 @@ class Bot(private val config: Config.BotConfig) {
                         commandExecutor.execute(Chat(message.envelope, chatDeps))
                     }
                 }
+
+                log.info { "websocket connection closed, reconnecting ..." }
+                delay(1.seconds)
+            } catch (e: CancellationException) {
+                log.debug { "bot loop cancelled" }
+                throw e
             } catch (e: Exception) {
                 log.error(e) { "❌ bot loop failed: ${e::class.simpleName}: ${e.message}" }
                 log.info { "⏳ delay 10 seconds before retry ..." }
