@@ -3,6 +3,7 @@ FROM gradle:9.0.0-jdk21-alpine AS builder
 WORKDIR /app
 
 COPY build.gradle.kts gradle.properties settings.gradle.kts ./
+COPY gradle ./gradle
 RUN gradle shadowJar -x test --no-daemon
 COPY src ./src
 RUN gradle shadowJar --no-daemon
