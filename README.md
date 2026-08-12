@@ -1,42 +1,52 @@
-signai
-------
+# signai
 
-### Prerequisites
+A chatbot for Signal that answers with OpenAI models.
 
-Install and configure [signal-cli-rest-api](https://github.com/bbernhard/signal-cli-rest-api) in `json-rpc-native` mode.
+## Commands
 
-### Docker
+- `chat <text>` — ask the bot, e.g. `chat How are you?`
+- `chatctx` — show the current dialog history
+- `chatrm` — clear the dialog history
+
+Replying directly to one of the bot's messages counts as `chat`, so the command can be left out.
+
+## Prerequisites
+
+The bot reaches Signal through [signal-cli-rest-api](https://github.com/bbernhard/signal-cli-rest-api), which comes up
+alongside it. That service needs a Signal account of its own, and nothing works until it has one.
+
+The short path is linking an account you already have, as a second device:
+
+1. Uncomment the `ports` lines under `signal-cli-rest-api` in [compose.yaml](compose.yaml).
+2. Start that service on its own:
+
+   ```bash
+   docker compose up -d signal-cli-rest-api
+   ```
+
+3. Open <http://localhost:8080/v1/qrcodelink?device_name=signal-api> in a browser.
+4. On the phone holding the account: **Settings → Linked devices → +**, and scan the QR code.
+5. Comment the `ports` lines back. The bot reaches the service over the compose network, and nothing else needs to.
+
+## Docker
 
 ```bash
-docker run -d \
-  --name signai \
-  --restart unless-stopped \
-  -e BOT_NAME=signai \
-  -e BOT_USERNAME=signai \
-  -e OPENAI_API_KEY=sk-proj-qwerty \
-  -e CHAT_SYSTEM_PROMPT="You are in a Signal group chat." \
-  -e GPT_MODEL=gpt-5.4 \
-  -e REQUESTS_PER_USER_PER_HOUR=10 \
-  -e SIGNAL_API_URL=http://signal-cli-rest-api:8080 \
-  -e SIGNAL_PHONE_NUMBER=+380980000000 \
-  ghcr.io/helltar/signai:latest
+# the repo carries compose.yaml and the env template
+git clone https://github.com/Helltar/signai.git && cd signai
+
+# fill in at least OPENAI_API_KEY and SIGNAL_PHONE_NUMBER
+cp .env.example .env
+
+# starts the bot and signal-cli-rest-api
+docker compose up -d
 ```
 
-| Variable | Description |
-| --- | --- |
-| `BOT_NAME` | Visible Signal profile name for the bot account |
-| `BOT_USERNAME` | Signal username to set for the bot account |
-| `OPENAI_API_KEY` | API key used for OpenAI requests |
-| `CHAT_SYSTEM_PROMPT` | System message injected into each new dialog context |
-| `GPT_MODEL` | OpenAI model name used for chat completions |
-| `REQUESTS_PER_USER_PER_HOUR` | Per-user limit for `chat` requests. Defaults to `30` |
-| `SIGNAL_API_URL` | URL to your `signal-cli-rest-api` service |
-| `SIGNAL_PHONE_NUMBER` | Bot account phone number in Signal |
+Every variable is described in [.env.example](.env.example).
 
-### Bot Commands
+## Profile Picture
 
-- `chat <text>`: Ask the bot (example: `chat How are you?`)
-- `chatctx`: Show current dialog history
-- `chatrm`: Clear dialog history
+The image ships a default avatar, used when `AVATAR_FILE` is unset. To use your own, mount it and point `AVATAR_FILE`
+at it — the compose file has the mount ready to uncomment, and no rebuild is needed.
 
-**Tip**: If you reply directly to a bot message, it will be processed as a `chat` command automatically.
+An `AVATAR_FILE` that cannot be read stops the bot on startup rather than quietly keeping the old picture. The startup
+log names the one in effect either way.

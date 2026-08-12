@@ -1,7 +1,7 @@
 services:
 
   signal-cli-rest-api:
-    container_name: signal-cli-api_container
+    container_name: signal-cli-api-container
     image: bbernhard/signal-cli-rest-api:latest
     restart: unless-stopped
     environment:
@@ -9,17 +9,21 @@ services:
       - JSON_RPC_TRUST_NEW_IDENTITIES=always
     volumes:
       - signal-cli-rest-api_data:/home/.local/share/signal-cli
+    # the bot reaches this over the compose network; uncomment only to link the account from a
+    # browser on the host, and comment it back afterwards
+    # ports:
+    #   - "127.0.0.1:8080:8080"
 
   signai:
-    container_name: signai_container
+    container_name: signai-container
     image: ghcr.io/helltar/signai:latest
     restart: unless-stopped
     env_file: .env
-    volumes:
-      - signai_data:/app/data
+    # uncomment to use your own avatar instead of the packaged one
+    # volumes:
+    #   - ./avatar.jpg:/app/avatar.jpg:ro
     depends_on:
       - signal-cli-rest-api
 
 volumes:
-  signai_data:
   signal-cli-rest-api_data:

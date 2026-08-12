@@ -38,7 +38,7 @@ class Bot(private val config: Config.BotConfig) {
         log.info { "⚙️ bot config: ${config.toSafeLog()}" }
         val usernameResponse = signal.setUsername(config.botUsername)
         log.info { "ℹ\uFE0F set username response: $usernameResponse" }
-        signal.updateProfile(config.botName, config.avatar)
+        signal.updateProfile(config.botName, config.avatar.bytes)
         log.info { "🚀 start ..." }
     }
 

@@ -11,7 +11,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
-import java.io.File
 import java.util.*
 
 class Signal(private val apiUrl: String, private val phoneNumber: String, private val networkClient: NetworkClient) {
@@ -41,9 +40,9 @@ class Signal(private val apiUrl: String, private val phoneNumber: String, privat
         return networkClient.post(url, body = body)
     }
 
-    suspend fun updateProfile(name: String, avatar: File) {
+    suspend fun updateProfile(name: String, avatar: ByteArray) {
         val url = "$apiUrl/$API_VERSION/profiles/$phoneNumber"
-        val base64Avatar = Base64.getEncoder().encodeToString(avatar.readBytes())
+        val base64Avatar = Base64.getEncoder().encodeToString(avatar)
         val body = json.encodeToString(Profiles.Request(base64Avatar, name))
         networkClient.put(url, body)
     }
