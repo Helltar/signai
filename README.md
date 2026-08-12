@@ -13,21 +13,20 @@ Replying directly to one of the bot's messages counts as `chat`, so the command 
 ## Installation
 
 ```bash
-# the repo carries compose.yaml and the env template
-git clone https://github.com/Helltar/signai.git && cd signai
-
-# fill in at least OPENAI_API_KEY and SIGNAL_PHONE_NUMBER
-cp .env.example .env
+mkdir signai && cd signai && \
+  curl -fsSL \
+    -o compose.yaml https://raw.githubusercontent.com/Helltar/signai/master/compose.yaml \
+    -o .env https://raw.githubusercontent.com/Helltar/signai/master/.env.example
 ```
 
-Every variable is described in [.env.example](.env.example).
+Set `OPENAI_API_KEY` and `SIGNAL_PHONE_NUMBER` in `.env`.
 
 ### Signal account
 
-The bot reaches Signal through [signal-cli-rest-api](https://github.com/bbernhard/signal-cli-rest-api), which comes up
-alongside it. That service needs a Signal account of its own, and nothing works until it has one.
+The bot reaches Signal through [signal-cli-rest-api](https://github.com/bbernhard/signal-cli-rest-api), which runs
+alongside it. Before starting the bot, link that service to the Signal account the bot will use.
 
-The short path is linking an account you already have, as a second device:
+Link the account as a second device:
 
 1. Start a one-off instance with a temporary port bound to localhost:
 
@@ -37,8 +36,8 @@ The short path is linking an account you already have, as a second device:
 
 2. Open <http://localhost:8080/v1/qrcodelink?device_name=signal-api> in a browser.
 3. On the phone holding the account: **Settings → Linked devices → +**, and scan the QR code.
-4. Press `Ctrl+C` in the terminal. The one-off container is removed and its host port is closed; the linked account
-   remains in the shared Docker volume.
+4. Wait for `signal-api` to appear under **Linked devices**, then press `Ctrl+C` in the terminal. The one-off container
+   is removed and its host port is closed; the linked account remains in the shared Docker volume.
 5. Start everything:
 
    ```bash
