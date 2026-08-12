@@ -38,10 +38,10 @@ Link the account as a second device:
 3. On the phone holding the account: **Settings → Linked devices → +**, and scan the QR code.
 4. Wait for `signal-api` to appear under **Linked devices**, then press `Ctrl+C` in the terminal. The one-off container
    is removed and its host port is closed; the linked account remains in the shared Docker volume.
-5. Start everything:
+5. Start the bot and its Signal service:
 
    ```bash
    docker compose up -d
    ```
 
-The bot uses the name, username, and profile picture configured for this account on the phone.
+That's it — once the containers are running, the bot is ready to use.
