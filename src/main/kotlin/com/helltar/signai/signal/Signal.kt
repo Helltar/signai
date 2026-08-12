@@ -8,17 +8,46 @@ import com.helltar.signai.signal.model.TypingIndicator
 import com.helltar.signai.signal.model.accounts.Username
 import com.helltar.signai.signal.model.configuration.Settings
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.delay
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import java.util.*
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeSource
 
 class Signal(private val apiUrl: String, private val phoneNumber: String, private val networkClient: NetworkClient) {
 
     private companion object {
         const val API_VERSION = "v1"
+
+        val READY_TIMEOUT = 2.minutes
+        val READY_POLL_INTERVAL = 2.seconds
+
         val json = Json { ignoreUnknownKeys = true }
+
         val log = KotlinLogging.logger {}
+    }
+
+    suspend fun awaitReady(timeout: Duration = READY_TIMEOUT) {
+        val deadline = TimeSource.Monotonic.markNow() + timeout
+        var waitingReported = false
+
+        while (true) {
+            val failure = runCatching { networkClient.get("$apiUrl/$API_VERSION/accounts") }.exceptionOrNull() ?: return
+
+            if (deadline.hasPassedNow())
+                throw IllegalStateException("signal-cli-rest-api at $apiUrl did not answer within $timeout", failure)
+
+            if (!waitingReported) {
+                log.info { "⏳ waiting for signal-cli-rest-api at $apiUrl ..." }
+                waitingReported = true
+            }
+
+            delay(READY_POLL_INTERVAL)
+        }
     }
 
     suspend fun receiveEach(ignoreAttachments: Boolean = true, onReceive: suspend (Receive.Response) -> Unit) {
