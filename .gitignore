@@ -5,3 +5,6 @@
 build/
 deploy/
 data/logs
+
+.env
+compose.local.yaml
