@@ -37,9 +37,6 @@ class Bot(private val config: Config.BotConfig) {
     private suspend fun init() {
         log.info { "⚙️ bot config: ${config.toSafeLog()}" }
         signal.awaitReady()
-        val usernameResponse = signal.setUsername(config.botUsername)
-        log.info { "ℹ\uFE0F set username response: $usernameResponse" }
-        signal.updateProfile(config.botName, config.avatar.bytes)
         log.info { "🚀 start ..." }
     }
 

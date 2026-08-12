@@ -69,6 +69,7 @@ class Signal(private val apiUrl: String, private val phoneNumber: String, privat
         return networkClient.post(url, body = body)
     }
 
+    @Suppress("unused")
     suspend fun updateProfile(name: String, avatar: ByteArray) {
         val url = "$apiUrl/$API_VERSION/profiles/$phoneNumber"
         val base64Avatar = Base64.getEncoder().encodeToString(avatar)
@@ -76,6 +77,7 @@ class Signal(private val apiUrl: String, private val phoneNumber: String, privat
         networkClient.put(url, body)
     }
 
+    @Suppress("unused")
     suspend fun setUsername(username: String): String {
         val url = "$apiUrl/$API_VERSION/accounts/$phoneNumber/username"
         val body = json.encodeToString(Username.Request(username))

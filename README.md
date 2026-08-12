@@ -29,26 +29,20 @@ alongside it. That service needs a Signal account of its own, and nothing works 
 
 The short path is linking an account you already have, as a second device:
 
-1. Uncomment the `ports` lines under `signal-cli-rest-api` in [compose.yaml](compose.yaml).
-2. Start that service on its own:
+1. Start a one-off instance with a temporary port bound to localhost:
 
    ```bash
-   docker compose up -d signal-cli-rest-api
+   docker compose run --rm -p 127.0.0.1:8080:8080 signal-cli-rest-api
    ```
 
-3. Open <http://localhost:8080/v1/qrcodelink?device_name=signal-api> in a browser.
-4. On the phone holding the account: **Settings → Linked devices → +**, and scan the QR code.
-5. Comment the `ports` lines back. The bot reaches the service over the compose network, and nothing else needs to.
-6. Start everything:
+2. Open <http://localhost:8080/v1/qrcodelink?device_name=signal-api> in a browser.
+3. On the phone holding the account: **Settings → Linked devices → +**, and scan the QR code.
+4. Press `Ctrl+C` in the terminal. The one-off container is removed and its host port is closed; the linked account
+   remains in the shared Docker volume.
+5. Start everything:
 
    ```bash
    docker compose up -d
    ```
 
-## Profile Picture
-
-The image ships a default avatar, used when `AVATAR_FILE` is unset. To use your own, mount it and point `AVATAR_FILE`
-at it — the compose file has the mount ready to uncomment, and no rebuild is needed.
-
-An `AVATAR_FILE` that cannot be read stops the bot on startup rather than quietly keeping the old picture. The startup
-log names the one in effect either way.
+The bot uses the name, username, and profile picture configured for this account on the phone.
